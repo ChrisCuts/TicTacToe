@@ -7,13 +7,16 @@ Created on Mon Sep 18 21:38:58 2017
 
 from TicTacToe import TicTacToe
 from random import choice, random
-    
+
 import matplotlib.pyplot as plt
         
 PAUSE = None
 
+### Create game
+# Pause after restart is sensible, without pause the game is not updated
 game = TicTacToe(pauseafterrestart=0.0000001)
 
+# Create statistics panel
 fig = plt.figure('Stats')
 ax_Qs = plt.subplot(2, 1, 1)
 plt.hold(True)
@@ -22,12 +25,14 @@ plt.hold(True)
 ax_Qs.cla()
 ax_Ps.cla()
 
+# Count points
 points = {'X': [0], 'O': [0]}
 
 def pause():
     if PAUSE:
         game.sleep(PAUSE)
 
+# Statistics panel update function
 def plot_stats(path, path2, winner):
     ax_Qs.cla()
     #print(winner, path, path2)
@@ -51,8 +56,11 @@ def plot_stats(path, path2, winner):
     
 
 class Learner():   
+    '''Reinforcement Q learner'''
     
+    # learning rate
     ALPHA = 0.5
+    # discount factor
     DISCOUNT = 0.1
     
     Q_INIT = 0
@@ -61,26 +69,28 @@ class Learner():
         self.Qs = {}
         self.path = []
         
+        # initialize state and action
         self.old_state = (0, 0, 0, 0, 0, 0, 0, 0, 0)
         self.old_action = 0
         
         self.name = name
         
+        # initialize greedy factor
         self.greedy = greedy
         
     def rotate(x):
-        
+        '''rotate game board 90°'''
         return [x[6], x[3], x[0], x[7], x[4], x[1], x[8], x[5], x[2]]
         
     def Q(self, s, a):
-            
+        '''get Q if there is one for this action'''
         if s in self.Qs and a in self.Qs[s]:
             return self.Qs[s][a]
         else:
             return self.Q_INIT
     
     def update_q(self, r, q_max):
-        
+        '''learn Q'''
         s = self.old_state
         a = self.old_action
         
@@ -99,14 +109,15 @@ class Learner():
         self.path.append(self.Qs[s][a])
             
     def possible_actions(self, s):
-        
+        '''determine which squares on play board is empty ( == 0 )'''
         return [num for num, field in enumerate(s) if field == 0]
         
     
     def go(self):
-        
+        '''do the next move and learn from it'''
         s = tuple(game.get_state())
         
+        # is it the first or second move in game? -> reset path
         if s.count(0) >= 8:
             self.path = []
         
@@ -117,6 +128,7 @@ class Learner():
         # find best action        
         possible_a = self.possible_actions(s)
         
+        #  
         q = list(map(lambda a: self.Q(s, a), possible_a))
         q_max = max(q)
         
