@@ -128,10 +128,11 @@ class Learner():
         # find best action        
         possible_a = self.possible_actions(s)
         
-        #  
+        # get q values for possible actions 
         q = list(map(lambda a: self.Q(s, a), possible_a))
         q_max = max(q)
         
+        # get best action / actions
         a_max = [a for i, a in enumerate(possible_a) if q[i] == q_max]
         a_max = choice(a_max)
         
@@ -158,6 +159,7 @@ class Learner():
                 game.restart('X')
             return
         
+        # is there a winner?
         winner = game.get_winner()
         
         # determine reward
@@ -178,6 +180,7 @@ class Learner():
             opp = self.opponent
             opp.update_q(-5, 0)
             
+            # update stats
             self.path.append(r)
             plot_stats(self.path, opp.path, self.name)
             
@@ -186,7 +189,9 @@ class Learner():
             else:
                 game.restart('X')
             
-        
+### create players
+# greedy = 1 -> no randomization
+# greedy = 0 -> complete random (no learning) 
 X = Learner('X', greedy=1)
 O = Learner('O', greedy=1)
 
@@ -196,14 +201,8 @@ O.opponent = X
 while(True):
     
     pause()
-    
     X.go()
-    
     pause()
-    
     O.go()
-    
     pause()
-    
-    
     
